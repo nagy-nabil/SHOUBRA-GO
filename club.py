@@ -82,3 +82,65 @@ class Club:
         except :
             del self
             # print("Club already exist")\
+            
+  
+    #save squad in file
+    def club_squad_file(self):
+        #save the file in club folder
+        with open(f'{os.getcwd()}/{self.__name}/{self.__name}.csv','a',newline='') as csvfile:
+            writer = csv.writer(csvfile,delimiter=',',quotechar='|')
+            #get squad will return list so we can go through it
+            for player in self.get_squad():
+                writer.writerow([player.get_name(),player.get_age(),player.get_position(),player.get_no_goals(),player.get_yel_card(),player.get_red_card()])
+
+    #
+    @staticmethod
+    def store_club(clubs,newclub,master):
+        clubs.append(newclub)
+        newclub.club_squad_file()
+        master.destroy()    
+
+    #function used for create club button
+    #main idea to check if the name not empty and create the club object
+    #button suppose to take create club button to disabled it or remove it 
+    @staticmethod
+    def create_club_command(master,name_entry,clubs,button):
+        #means if the name entry is empty show that name can't be empty
+        if not not_empty_entry(name_entry):
+            notfi=Label(master,text="club name cannot be empty",fg="red")
+        else:
+            notfi=Label(master,text="                                                                                               ",fg="red")
+            button.grid_forget()
+            name_entry.config(state=DISABLED)
+            newclub=Club(name=name_entry.get().strip())#new club object
+            #to keep track how many players did we store and if 5 show save club
+            player_num=[1]
+            #this button will be hidden until 5 players are stored
+            save_club=Button(master,text="save club",command=lambda:Club.store_club(clubs,newclub,master))
+            Player.add_player(newclub,master,player_num,save_club)#to show add player widgets and add the data in newplayer object
+            #hide the club save button when 5 players are saved this button will be avaliable
+            save_club.grid_forget()
+        #to show failed or created in same place
+        notfi.grid(row=9,column=1,padx=10,pady=10)
+
+    """function to create add club page gui 
+    and take club squad within it for new club 5 players
+    to add new club you need just enter his name ,and 5 players name , age and position (5 players data will be taken witn function from player module)
+    """
+    @staticmethod
+    def add_club(clubs):
+        master=Tk()#window object
+        master.title("add new club")
+        master.geometry("450x400")
+        master.resizable(False,False)
+        #add widgets to set the window
+        club_name_label=Label(master,text="club name")
+        club_name=Entry(master)
+        #button to take the name and create folder with that name (club folder)
+        create_club=Button(master,text="create club",command=lambda:Club.create_club_command(master,club_name,clubs,create_club))
+        #edit widgets with grid
+        club_name_label.grid(row=1,column=0,padx=10,pady=10)
+        club_name.grid(row=1, column=1,padx=10,pady=10)
+        create_club.grid(row=1,column=2,padx=10,pady=10)
+        master.mainloop()
+
