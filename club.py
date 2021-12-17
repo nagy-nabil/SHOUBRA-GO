@@ -1,3 +1,36 @@
+from player import Player 
+import os
+import csv
+from tkinter import *
+from random import randrange
+from tkinter import messagebox
+from tkinter.ttk import *
+
+import webbrowser #module used to open about me link
+
+
+#to make menu with file and about only for main page and add club page
+def main_menu(master):
+    #menus gui
+    menubar=Menu(master)
+    #file menu to exit in any time
+    filemenu=Menu(menubar,tearoff=0)
+    menubar.add_cascade(label="file",menu=filemenu)
+    filemenu.add_command(label="add club",command=lambda:Club.add_club(master))
+    filemenu.add_command(label="delete club",command=lambda:Club.delete_club_gui(master))
+    filemenu.add_command(label="standing",state=DISABLED)
+    filemenu.add_command(label="end league",state=DISABLED)
+    filemenu.add_separator()
+    #to close master window in any time
+    filemenu.add_command(label="exit",command=master.destroy)
+    #about menu gui to go to github page
+    aboutmenu=Menu(menubar,tearoff=0)
+    menubar.add_cascade(label="About",menu=aboutmenu)
+    aboutmenu.add_command(label="about me",command=open_link)
+    #to set menubar as menu for master
+    master.config(menu=menubar)
+
+
 #function to open link from about me command 
 def open_link():
     url="https://github.com/nagy-nabil/SHOUBRA-GO"
