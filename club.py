@@ -142,3 +142,147 @@ class Club:
             return True
         except :
             del self
+    #Print the club
+    def __str__(self):
+        return f"name {self.__name}"
+    #Print the club
+    def __repr__(self):
+        return f"name {self.__name}"
+    #save squad in file
+    def club_squad_file(self):
+        #save the file in club folder
+        file=self.__name.title()
+        with open(f'{os.getcwd()}/{self.__name}/{file}.csv','a',newline='') as csvfile:
+            writer = csv.writer(csvfile,delimiter=',',quotechar='|')
+            writer.writerow(["NAME",'AGE','POSITION','GOALS','Y CARDS','R CARDS'])
+            #get squad will return list so we can go through it
+            for player in self.get_squad():
+                writer.writerow([player.get_name(),player.get_age(),player.get_position(),player.get_no_goals(),player.get_yel_card(),player.get_red_card()])
+
+    #function used to add club name to file contain all clubs name
+    def add_to_all(self):
+        with open(f'{os.getcwd()}/allclubs.csv','a',newline='') as csvfile:
+            writer = csv.writer(csvfile,delimiter=',',quotechar='|')
+            writer.writerow([self.get_name().title()])
+        with open(f'{os.getcwd()}/available.csv','a',newline='') as csvfile2:
+            writer2 = csv.writer(csvfile2,delimiter=',',quotechar='|')
+            writer2.writerow([self.get_name().title()])
+
+    #used to store club name in allclubs file (database refrence) and store club squad file
+    @staticmethod
+    def store_club(newclub,master):
+        newclub.add_to_all()
+        newclub.club_squad_file()
+        messagebox.showinfo("SAVED", "Club saved successfully")
+        master.destroy()
+
+
+    #function used for create club button
+    #main idea to check if the name not empty and create the club object
+    #button suppose to take create club button to disabled it or remove it 
+    @staticmethod
+    def check_available_club(name):
+        try:
+            with open(f'{os.getcwd()}/allclubs.csv','r',newline='') as csvfile:
+                reader = csv.reader(csvfile,delimiter=',',quotechar='|')
+                for line in reader:
+                    if name in line:
+                        return False
+            return True
+        except : #if the file doesn't exist means no clubs so all names are avaliable
+            return True
+    @staticmethod
+    def create_club_command(master,name_entry,button):
+        #means if the name entry is empty show that name can't be empty
+        if not not_empty_entry(name_entry):
+            
+            messagebox.showerror("EMPTY","club name cannot be empty")
+        else:
+            if Club.check_available_club(name_entry.get().strip().title())==False:
+                messagebox.showerror("EXIST","Club already exist")
+            else:
+                button.grid_forget()
+                name_entry.config(state=DISABLED)
+                newclub=Club(name=name_entry.get().strip().title(),squad=[])#new club object
+                #to keep track how many players did we store and if 5 show save club
+                player_num=[1]
+                #this button will be hidden until 5 players are stored
+                save_club=Button(master,text="save club",command=lambda:Club.store_club(newclub,master))
+                Player.get_player_data(newclub,master,player_num,save_club)#to show add player widgets and add the data in newplayer object
+                #hide the club save button when 5 players are saved this button will be avaliable
+                save_club.grid_forget()
+
+
+    """function to create add club page gui 
+    and take club squad within it for new club 5 players
+    to add new club you need just enter his name ,and 5 players name , age and position (5 players data will be taken witn function from player module)
+    window to be destroyed to keep just one window 
+    """
+    @staticmethod
+    def add_club(window):
+        window.destroy()#to destroy the previous window
+        master=Tk()#window object
+        master.title("add new club")
+        master.geometry("550x400+300+200")
+        master.resizable(False,False)
+        main_menu(master)
+        #add widgets to set the window
+        club_name_label=Label(master,text="club name")
+        club_name=Entry(master)
+        #button to take the name and create folder with that name (club folder)
+        create_club=Button(master,text="create club",command=lambda:Club.create_club_command(master,club_name,create_club))
+        #edit widgets with grid
+        club_name_label.grid(row=1,column=0,padx=10,pady=10)
+        club_name.grid(row=1, column=1,padx=10,pady=10)
+        create_club.grid(row=1,column=2,padx=10,pady=10)
+        master.mainloop()
+
+    #window to add delete club frame in it 
+    """
+    works as that load the allclubs file and see if the club the user want to delete in it or not if exist will give him question yes no to be sure he want to delete this club becsue it will destroy the current working league 
+    """
+    @staticmethod
+    def delete_club_gui(window):
+        delete_frame=Frame(window)
+        club_name_label=Label(delete_frame,text="club name")
+        club_name_entry=Entry(delete_frame)
+        club_name_button=Button(delete_frame,text="DELETE",command=lambda:Club.delete_club(delete_frame,club_name_entry))
+        club_name_label.grid(row=0,column=0,padx=10,pady=10)
+        club_name_entry.grid(row=0,column=1,padx=10,pady=10)
+        club_name_button.grid(row=0,column=2,padx=10,pady=10)
+        delete_frame.grid(row=0)
+    """take the frame to delete it after it no longer neaded and entry to take the data from it""" 
+    @staticmethod
+    def delete_club(frame,entry):
+        name=entry.get().strip().title()
+        clubs=[]#empty list to store all clubs name in it
+        try:
+            #try read the data 
+            with open(f'{os.getcwd()}/allclubs.csv','r',newline='') as csvfile:
+                reader = csv.reader(csvfile,delimiter=',',quotechar='|')
+                for club in reader:
+                    clubs.append(club[0])
+                #close the file
+            if name in clubs:#if you find the club do the operations
+                sure=messagebox.askyesno("SURE","are you sure you want to delete the club?")
+                if sure==1:
+                    clubs.remove(name)
+                    os.remove(f'{os.getcwd()}/{name}/{name}.csv')
+                    os.rmdir(f'{os.getcwd()}/{name}')
+                    #to rewrite the all clubs file without that club name
+                    with open(f'{os.getcwd()}/allclubs.csv','w',newline='') as csvfile:
+                        writer = csv.writer(csvfile,delimiter=',',quotechar='|')
+                        for club in clubs:
+                            writer.writerow([club])
+                    #close the file
+                    messagebox.showinfo("DELETED","club has been successfully deleted from your database")
+                    frame.grid_forget()#to delete the delete club frame 
+                else:#no longer need to delete club
+                    messagebox.showinfo("no club","no clubs have been deleted")
+                    frame.grid_forget()#to delete the delete club frame 
+            else:#didn't find the club name
+                messagebox.showinfo("no club","no club with that name")
+                frame.grid_forget()#to delete the delete club frame 
+        except : #if the file doesn't exist means no clubs to delete
+            messagebox.showinfo("no club","no club with that name")
+            frame.grid_forget()#to delete the delete club frame       
