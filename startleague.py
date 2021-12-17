@@ -320,3 +320,123 @@ def end_league(master,name):
         messagebox.showerror("ERROR","file doesn't exist")
 
 #to make menu with file and about only for start league
+def main_menu(master,name):
+    #menus gui
+    menubar=Menu(master)
+    #file menu to exit in any time
+    filemenu=Menu(menubar,tearoff=0)
+    menubar.add_cascade(label="file",menu=filemenu)
+    filemenu.add_command(label="add club",command=lambda:Club.add_club(master))
+    filemenu.add_command(label="delete club",command=lambda:Club.delete_club_gui(master))
+    filemenu.add_command(label="standing",command=lambda:scoreboard())
+    filemenu.add_command(label="end league",command=lambda:end_league(master,name))
+    filemenu.add_separator() 
+    #to close master window in any time
+    filemenu.add_command(label="exit",command=master.destroy)
+    #about menu gui to go to github page
+    aboutmenu=Menu(menubar,tearoff=0)
+    menubar.add_cascade(label="About",menu=aboutmenu)
+    aboutmenu.add_command(label="about me",command=open_link)
+    #to set menubar as menu for master
+    master.config(menu=menubar)
+# to know how many clubs do we have
+def clubs_database():
+    global clubs_no
+    global clubs
+    #try to open the file as read to not give error if the file doesn't exist
+    try:
+        with open(f'{os.getcwd()}/available.csv','r',newline='') as csvfile:
+            reader = csv.reader(csvfile,delimiter=',',quotechar='|')
+            for row in reader:
+                #clubs will conatain the name of the clubs only
+                clubs.append(row[0])
+            clubs_no=len(clubs)
+        os.remove(f'{os.getcwd()}/available.csv')
+        print("No Error")
+    except:
+        print("Error")
+#to start new league
+def start_league_gui(window):
+    window.destroy()
+    '''
+    take new league name and check it's avaliable
+    '''
+    #if league doesn't know how many club do we have
+    
+    master=Tk()
+    master.geometry("750x600")
+    league_name_label=Label(master,text="league name")
+    league_name_entry=Entry(master)
+    league_name_button=Button(master,text="start",command=lambda:start_league(master,league_name_entry,league_name_button))
+    league_name_label.grid(row=0, column=0,padx=10,pady=10)
+    league_name_entry.grid(row=0, column=1,padx=10,pady=10)
+    league_name_button.grid(row=0, column=2,padx=10,pady=10)
+    master.mainloop()
+#start new league command
+def start_league(master,name_entry,button):
+    if not_empty_entry(name_entry):
+        name=name_entry.get().strip().title()
+        name_entry.config(state=DISABLED)
+        button.destroy()
+        
+        clubs_database()#load from data base
+        if f"{name}.csv" in os.listdir(os.getcwd()):
+            ask=messagebox.askyesno("ASK","there's the same name do you want to load it?")
+            if ask==1:
+                main_menu(master,name)
+                continue_league(master,name_entry,button)
+                name_entry.config(state=DISABLED)
+                button.destroy()
+        #if there's no league will check for clubs number if bigger then 2 will make new league if not say not enough clubs and give button to add new club
+        #start new league
+        elif(clubs_no>2):
+            main_menu(master,name)
+            name_entry.config(state=DISABLED)
+            button.destroy()
+            new_league_dict()
+            #create new league file
+            new_league_file(name)
+            table_gui(master,i,name)
+        elif(clubs_no<3):
+            Label(master,text="You don't Have enough clubs to start league").grid(row=0, column=0,padx=10,pady=10)
+            add_club=Button(master,text="add club",command=lambda:Club.add_club(master))
+            add_club.grid(row=3, column=1,padx=10,pady=10)
+    else:
+        messagebox.showerror("EMPTY","Empty league name")
+
+def continue_league_gui(window):
+    window.destroy()
+    master=Tk()
+    league_name_label=Label(master,text="league name")
+    league_name_entry=Entry(master)
+    
+    league_name_button=Button(master,text="start",command=lambda:continue_league(master,league_name_entry,league_name_button))
+    league_name_label.grid(row=0, column=0,padx=10,pady=10)
+    league_name_entry.grid(row=0, column=1,padx=10,pady=10)
+    league_name_button.grid(row=0, column=2,padx=10,pady=10)
+    master.mainloop()
+
+def continue_league(master,name_entry,button):
+    if not_empty_entry(name_entry):
+        name=name_entry.get().strip().title()
+        
+        
+        if f"{name}.csv" in os.listdir(os.getcwd()):
+            main_menu(master,name)
+            name_entry.config(state=DISABLED)
+            button.destroy()
+            load_league(name)
+            con_league(master,name)
+            if (i>=len(table)):
+                Label(master,text="DONE").grid(row=100 , padx=10, pady=10)
+            else:
+                table_gui(master,i,name)
+        else:
+            ask=messagebox.askyesno("ASK","name not avaliable do you want to create new league?")
+            if ask==1:
+                main_menu(master,name)
+                name_entry.config(state=DISABLED)
+                button.destroy()
+                start_league(master,name_entry,button)
+    else:
+        messagebox.showerror("EMPTY","Empty league name")
