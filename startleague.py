@@ -166,3 +166,157 @@ def x_command(e1,e2,master,button,league_name):
         # notfi.grid(row=0,padx=10,pady=10)
     
 #function to modify the file after change
+def modify_file(name):
+    #to modify league file
+    with open(f'{os.getcwd()}/{name}.csv','w',newline='') as leagueFile:
+        writer=csv.writer(leagueFile,delimiter=',',quotechar='|')
+        #save clubs number to know how many matches we have
+        writer.writerow([clubs_no])
+        #save matches schudle in the file as [team1 name , team2 name , -1 , -1] -1 stands for the match still not played
+        global table
+        for match in table:
+            writer.writerow([match[0], match[1],match[2],match[3]])
+        #in that form [name, mp , win, draw, lose, gf, ga, gd ,pts]
+        for team in clubs_objs:#team is club name
+            writer.writerow([team,clubs_objs[team].get_no_matches(),clubs_objs[team].get_wins(),clubs_objs[team].get_draws(),clubs_objs[team].get_loses(),clubs_objs[team].get_GF(),clubs_objs[team].get_GA(),clubs_objs[team].get_GD(),clubs_objs[team].get_points()])
+    #to modify squad for team1
+    with open(f'{os.getcwd()}/{table[i][0]}/{table[i][0]}.csv','w',newline='') as squadFile:
+        writerPlayer=csv.writer(squadFile,delimiter=',',quotechar='|')
+        writerPlayer.writerow(["NAME",'AGE','POSITION','GOALS','Y CARDS','R CARDS'])
+        squad=clubs_objs[table[i][0]].get_squad()
+        for player in squad:
+            writerPlayer.writerow([player.get_name(),player.get_age(),player.get_position(),player.get_no_goals(),player.get_yel_card(),player.get_red_card()])
+        print(f"in mod after {table[i][0]} {len(squad)}")
+    #to modify squad for team2
+    with open(f'{os.getcwd()}/{table[i][1]}/{table[i][1]}.csv','w',newline='') as squadFile:
+        writerPlayer=csv.writer(squadFile,delimiter=',',quotechar='|')
+        writerPlayer.writerow(["NAME",'AGE','POSITION','GOALS','Y CARDS','R CARDS'])
+        squad=clubs_objs[table[i][1]].get_squad()
+        for player in squad:
+            writerPlayer.writerow([player.get_name(),player.get_age(),player.get_position(),player.get_no_goals(),player.get_yel_card(),player.get_red_card()])
+        # print(f"in mod after {table[i][1]} {len(squad)}")
+
+#continue league know where we are in table 
+def con_league(master,league_name):
+    global i
+    for match in table:
+        #result for team 1 
+        if match[2] != -1:
+            table_gui_dis(master,i,league_name)
+            i+=1
+        else:
+            return
+#function change dict data through each round
+def match_result(master,obj1,obj2,g1,g2):
+    page=Toplevel(master)
+    g1=int(g1)
+    g2=int(g2)
+    obj1.goals(g1,g2)
+    obj2.goals(g2,g1)
+    if g1>g2:
+        obj1.win()
+        obj2.lose()
+    elif g1<g2:
+        obj1.lose()
+        obj2.win()
+    else:
+        obj1.draw()
+        obj2.draw()
+    counter=0
+    
+    #obj2.add_cards()
+    Label(page,text=f"{obj1.get_name()}").grid(row=0,column=0,padx=10,pady=10)
+    while counter<g1:
+        #n1 will contain player 1 name
+        n1=obj1.player_score(1)
+        counter += 1 
+        Label(page,text=f"{n1} scored").grid(row=counter,column=0,padx=10,pady=10)
+    player1,player2,flag=obj1.add_cards()
+    Label(page,text=f"{player1} Got yellow card").grid(row=counter+1,column=0,padx=10,pady=10)
+    Label(page,text=f"{player2} Got yellow card").grid(row=counter+2,column=0,padx=10,pady=10)
+    if flag==1:
+        Label(page,text=f"{player1} Got red card").grid(row=counter+3,column=0,padx=10,pady=10)
+        
+    counter=0
+    Label(page,text=f"{obj2.get_name()}").grid(row=0,column=1,padx=10,pady=10)
+    while counter<g2:
+        n2=obj2.player_score(1)
+        counter += 1 
+        Label(page,text=f"{n2} scored").grid(row=counter,column=1,padx=10,pady=10)
+    player1,player2,flag2=obj2.add_cards()
+    Label(page,text=f"{player1} Got yellow card").grid(row=counter+1,column=1,padx=10,pady=10)
+    Label(page,text=f"{player2} Got yellow card").grid(row=counter+2,column=1,padx=10,pady=10)
+    if flag2==1:
+        Label(page,text=f"{player1} Got red card").grid(row=counter+3,column=1,padx=10,pady=10)
+
+#function to show scoreboard where every club name is button to access players data
+def scoreboard():
+    if len(clubs_objs)==0:
+        return
+    master=Tk()
+
+    #in that form [name, mp , win, draw, lose, gf, ga, gd ,pts]
+    # Label(master,text="CLUB NAME\t\t\tMP\t\t\tWINS\t\t\tDRAWS\t\t\tLOSSES\t\t\tGF\t\t\tGA\t\t\tGD\t\t\tPTS").grid(row=0,padx=10,pady=10)
+    Label(master,text="CLUB NAME").grid(row=0,padx=10,pady=10,column=0)
+    Label(master,text="MP").grid(row=0,padx=10,pady=10,column=1)
+    Label(master,text="WINS").grid(row=0,padx=10,pady=10,column=2)
+    Label(master,text="DRAWS").grid(row=0,padx=10,pady=10,column=3)
+    Label(master,text="LOSSES").grid(row=0,padx=10,pady=10,column=4)
+    Label(master,text="GF").grid(row=0,padx=10,pady=10,column=5)
+    Label(master,text="GA").grid(row=0,padx=10,pady=10,column=6)
+    Label(master,text="GD").grid(row=0,padx=10,pady=10,column=7)
+    Label(master,text="PTS").grid(row=0,padx=10,pady=10,column=8)
+    i=1    
+    for team in clubs_objs.values():
+        team_name=team.get_name()
+        button_plyers_data(team_name,master,i)
+        Label(master,text=f"{team.get_no_matches()}").grid(row=i,column=1,padx=10,pady=10)
+        Label(master,text=f"{team.get_wins()}").grid(row=i,column=2,padx=10,pady=10)
+        Label(master,text=f"{team.get_draws()}").grid(row=i,column=3,padx=10,pady=10)
+        Label(master,text=f"{team.get_loses()}").grid(row=i,column=4,padx=10,pady=10)
+        Label(master,text=f"{team.get_GF()}").grid(row=i,column=5,padx=10,pady=10)
+        Label(master,text=f"{team.get_GA()}").grid(row=i,column=6,padx=10,pady=10)
+        Label(master,text=f"{team.get_GD()}").grid(row=i,column=7,padx=10,pady=10)
+        Label(master,text=f"{team.get_points()}").grid(row=i,column=8,padx=10,pady=10)
+
+        i+=1
+    master.mainloop()
+#function used to assign each button to different team 
+def button_plyers_data(teamName,master,i):
+    Button(master,text=teamName,command=lambda:display_squad(clubs_objs.get(teamName),master)).grid(row=i,column=0,padx=5,pady=10)
+    # pass
+#take club object
+def display_squad(obj,master):
+    # global master
+    squad_page=Toplevel(master)
+    # Label(master,text="PLAYER NAME\t\t\t\t\t\tAGE\t\t\tPOSITION\t\t\tNO GOALS\t\t\tYEL CARD\t\t\tRED CARDS").grid(row=0,padx=10,pady=10)
+    Label(squad_page,text="PLAYER NAME").grid(row=0,padx=10,pady=10,column=0)
+    Label(squad_page,text="AGE").grid(row=0,padx=10,pady=10,column=1)
+    Label(squad_page,text="POSITION").grid(row=0,padx=10,pady=10,column=2)
+    Label(squad_page,text="NO GOALS").grid(row=0,padx=10,pady=10,column=3)
+    Label(squad_page,text="YEL CARD").grid(row=0,padx=10,pady=10,column=4)
+    Label(squad_page,text="RED CARDS").grid(row=0,padx=10,pady=10,column=5)
+    i=1
+    for player in obj.get_squad():
+        # Label(master,text=f"{player.get_name()}\t\t\t{player.get_age()}\t\t\t{player.get_position()}\t\t\t{player.get_no_goals()}\t\t\t{player.get_yel_card()}\t\t\t{player.get_red_card()}").grid(row=i,padx=10,pady=10)
+        Label(squad_page,text=f"{player.get_name()}").grid(row=i,padx=10,pady=10,column=0)
+        Label(squad_page,text=f"{player.get_age()}").grid(row=i,padx=10,pady=10,column=1)
+        Label(squad_page,text=f"{player.get_position()}").grid(row=i,padx=10,pady=10,column=2)
+        Label(squad_page,text=f"{player.get_no_goals()}").grid(row=i,padx=10,pady=10,column=3)
+        Label(squad_page,text=f"{player.get_yel_card()}").grid(row=i,padx=10,pady=10,column=4)
+        Label(squad_page,text=f"{player.get_red_card()}").grid(row=i,padx=10,pady=10,column=5)
+        i+=1
+    # master.mainloop()
+
+#to end current league by deleting file league and close window
+def end_league(master,name):
+    if os.path.exists(f"{name}.csv"):
+        sure=messagebox.askyesno("DELETE","are you sure you want to delete your league?")
+        if sure:
+            os.remove(f"{name}.csv")
+            messagebox.showinfo("DELETED",f"{name} deleted successfully")
+            master.destroy()
+    else:
+        messagebox.showerror("ERROR","file doesn't exist")
+
+#to make menu with file and about only for start league
