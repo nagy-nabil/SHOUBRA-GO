@@ -5,9 +5,23 @@ from tkinter import *
 from random import randrange
 from tkinter import messagebox
 from tkinter.ttk import *
-
 import webbrowser #module used to open about me link
-
+from PIL import Image, ImageTk
+#function used to add the logo in any window in pack() , take window to add in and size of the logo
+def show_logo(master,x,y):
+    # Create a photoimage object of the image in the path
+    try:
+        image1 = Image.open("Shoubra_GO-logos_black.png")
+    except:
+        pass
+    else:
+        image1 = image1.resize((x, y), Image.ANTIALIAS)
+        logo = ImageTk.PhotoImage(image1)
+        label1 = Label(master,image=logo)
+        label1.image=logo
+        # label1.image = test
+        #PhotoImage()
+        label1.pack()
 
 #to make menu with file and about only for main page and add club page
 def main_menu(master):
@@ -192,7 +206,7 @@ class Club:
         except : #if the file doesn't exist means no clubs so all names are avaliable
             return True
     @staticmethod
-    def create_club_command(master,name_entry,button):
+    def create_club_command(master,frame,name_entry,button):
         #means if the name entry is empty show that name can't be empty
         if not not_empty_entry(name_entry):
             
@@ -207,8 +221,8 @@ class Club:
                 #to keep track how many players did we store and if 5 show save club
                 player_num=[1]
                 #this button will be hidden until 5 players are stored
-                save_club=Button(master,text="save club",command=lambda:Club.store_club(newclub,master))
-                Player.get_player_data(newclub,master,player_num,save_club)#to show add player widgets and add the data in newplayer object
+                save_club=Button(frame,text="save club",command=lambda:Club.store_club(newclub,master))
+                Player.get_player_data(newclub,frame,player_num,save_club)#to show add player widgets and add the data in newplayer object
                 #hide the club save button when 5 players are saved this button will be avaliable
                 save_club.grid_forget()
 
@@ -222,19 +236,23 @@ class Club:
     def add_club(window):
         window.destroy()#to destroy the previous window
         master=Tk()#window object
+        master.iconbitmap('4876628.ico')
         master.title("add new club")
-        master.geometry("550x400+300+200")
+        show_logo(master,250,250)
+        master.geometry("550x550+300+200")
         master.resizable(False,False)
         main_menu(master)
+        add_frame=Frame(master)
         #add widgets to set the window
-        club_name_label=Label(master,text="club name")
-        club_name=Entry(master)
+        club_name_label=Label(add_frame,text="club name")
+        club_name=Entry(add_frame)
         #button to take the name and create folder with that name (club folder)
-        create_club=Button(master,text="create club",command=lambda:Club.create_club_command(master,club_name,create_club))
+        create_club=Button(add_frame,text="create club",command=lambda:Club.create_club_command(master,add_frame,club_name,create_club))
         #edit widgets with grid
         club_name_label.grid(row=1,column=0,padx=10,pady=10)
         club_name.grid(row=1, column=1,padx=10,pady=10)
         create_club.grid(row=1,column=2,padx=10,pady=10)
+        add_frame.pack()
         master.mainloop()
 
     #window to add delete club frame in it 
@@ -250,7 +268,7 @@ class Club:
         club_name_label.grid(row=0,column=0,padx=10,pady=10)
         club_name_entry.grid(row=0,column=1,padx=10,pady=10)
         club_name_button.grid(row=0,column=2,padx=10,pady=10)
-        delete_frame.grid(row=0)
+        delete_frame.grid(row=1000)
     """take the frame to delete it after it no longer neaded and entry to take the data from it""" 
     @staticmethod
     def delete_club(frame,entry):
@@ -285,4 +303,4 @@ class Club:
                 frame.grid_forget()#to delete the delete club frame 
         except : #if the file doesn't exist means no clubs to delete
             messagebox.showinfo("no club","no club with that name")
-            frame.grid_forget()#to delete the delete club frame       
+            frame.grid_forget()#to delete the delete club frame           

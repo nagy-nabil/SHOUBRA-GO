@@ -1,3 +1,4 @@
+
 from typing import MutableMapping
 from club import Club
 from player import Player
@@ -16,7 +17,8 @@ clubs_no=0
 table=[]
 #the key will be club name the vslue is club object
 clubs_objs={}
-
+#global varialbe to go through the table
+i=0
 #load all league  contents
 def load_league(name):
     global clubs_no
@@ -100,8 +102,6 @@ def new_league_dict():
         # print(f"{team} in start= {len(clubs_objs[team].get_squad())}")
 
 #function to print match schulde as gui
-#global varialbe to go through the table
-i=0
 def table_gui(master,i,league_name,state=NORMAL):
     #show all gui for the table
     team1=Label(master,text=f"{table[i][0]}")
@@ -157,7 +157,12 @@ def x_command(e1,e2,master,button,league_name):
         if i<len(table):
             table_gui(master,i,league_name)
         else:
-            Button(text="exit",command=master.destroy).grid(row=100) #exit button
+            #what to do after the league is over
+            Label(master,text="your league is over").grid(row=100 , padx=10, pady=10)
+            Button(master,text="EXIT",command=master.destroy).grid(row=101 ,column=1, padx=10, pady=10)
+            Button(master,text="end league",command=lambda:end_league(master,league_name)).grid(row=101 ,column=3, padx=10, pady=10)
+            Button(master,text="Standing",command=scoreboard).grid(row=101 ,column=2, padx=10, pady=10)
+            #Button(text="exit",command=master.destroy).grid(row=100) #exit button
     else:
         messagebox.showerror("VALID", "NON VAILD SCORE")
         e1.delete(0,END)
@@ -351,7 +356,9 @@ def clubs_database():
                 #clubs will conatain the name of the clubs only
                 clubs.append(row[0])
             clubs_no=len(clubs)
-        os.remove(f'{os.getcwd()}/available.csv')
+        #we only need to delete the file if we have enough clubs number otherwise leave the file
+        if clubs_no>=3:
+            os.remove(f'{os.getcwd()}/available.csv')
         print("No Error")
     except:
         print("Error")
@@ -364,6 +371,7 @@ def start_league_gui(window):
     #if league doesn't know how many club do we have
     
     master=Tk()
+    master.iconbitmap('4876628.ico')
     master.geometry("750x600")
     league_name_label=Label(master,text="league name")
     league_name_entry=Entry(master)
@@ -374,6 +382,17 @@ def start_league_gui(window):
     master.mainloop()
 #start new league command
 def start_league(master,name_entry,button):
+    global clubs
+    global clubs_no
+    global table
+    global clubs_objs
+    global i
+    #to remove any data exist before in the same run avoiding using the same data in different places 
+    clubs.clear()
+    clubs_no=0
+    table.clear()
+    clubs_objs.clear()
+    i=0
     if not_empty_entry(name_entry):
         name=name_entry.get().strip().title()
         name_entry.config(state=DISABLED)
@@ -398,7 +417,7 @@ def start_league(master,name_entry,button):
             new_league_file(name)
             table_gui(master,i,name)
         elif(clubs_no<3):
-            Label(master,text="You don't Have enough clubs to start league").grid(row=0, column=0,padx=10,pady=10)
+            Label(master,text="You don't Have enough clubs to start league").grid(row=1, column=0,padx=10,pady=10)
             add_club=Button(master,text="add club",command=lambda:Club.add_club(master))
             add_club.grid(row=3, column=1,padx=10,pady=10)
     else:
@@ -407,28 +426,43 @@ def start_league(master,name_entry,button):
 def continue_league_gui(window):
     window.destroy()
     master=Tk()
+    master.iconbitmap('4876628.ico')
     league_name_label=Label(master,text="league name")
     league_name_entry=Entry(master)
-    
     league_name_button=Button(master,text="start",command=lambda:continue_league(master,league_name_entry,league_name_button))
     league_name_label.grid(row=0, column=0,padx=10,pady=10)
     league_name_entry.grid(row=0, column=1,padx=10,pady=10)
     league_name_button.grid(row=0, column=2,padx=10,pady=10)
     master.mainloop()
 
+#function load data from league file and all squads files
 def continue_league(master,name_entry,button):
+    global clubs
+    global clubs_no
+    global table
+    global clubs_objs
+    global i
+    #to remove any data exist before in the same run avoiding using the same data in different places 
+    clubs.clear()
+    clubs_no=0
+    table.clear()
+    clubs_objs.clear()
+    i=0
     if not_empty_entry(name_entry):
         name=name_entry.get().strip().title()
-        
-        
+
         if f"{name}.csv" in os.listdir(os.getcwd()):
             main_menu(master,name)
             name_entry.config(state=DISABLED)
             button.destroy()
             load_league(name)
             con_league(master,name)
+            # if i reach table length means that all matches had been played so tell the user the league has ended
             if (i>=len(table)):
-                Label(master,text="DONE").grid(row=100 , padx=10, pady=10)
+                Label(master,text="your league is over").grid(row=100 , padx=10, pady=10)
+                Button(master,text="EXIT",command=master.destroy).grid(row=101 ,column=1, padx=10, pady=10)
+                Button(master,text="end league",command=lambda:end_league(master,name)).grid(row=101 ,column=3, padx=10, pady=10)
+                Button(master,text="Standing",command=scoreboard).grid(row=101 ,column=2, padx=10, pady=10)
             else:
                 table_gui(master,i,name)
         else:

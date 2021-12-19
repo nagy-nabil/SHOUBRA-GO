@@ -1,23 +1,19 @@
 from startleague import  continue_league_gui ,start_league_gui
-from club import Club,main_menu
+from club import Club,main_menu, show_logo
 from tkinter import *
 from tkinter.ttk import *
 from PIL import Image, ImageTk
 
+#function to know it's the first time for the program or no
 
 def main():
     master=Tk()#the only window we have
+    master.iconbitmap('4876628.ico')
     master.geometry("250x500+500+200")
-    master.title("main")
-    # Create a photoimage object of the image in the path
-    image1 = Image.open("Shoubra GO-logos_black.png")
-    image1 = image1.resize((250, 250), Image.ANTIALIAS)
-    test = ImageTk.PhotoImage(image1)
-
-    label1 = Label(image=test)
-    label1.image = test
+    master.title("Shoubra Go")
     main_menu(master)
-    PhotoImage()
+    #add the logo in row =0 col =0
+    show_logo(master,250,250)
     main_frame=Frame(master)
     #add widgets
     add_club=Button(main_frame,text="add club",command=lambda:add_to_main(master))
@@ -29,8 +25,7 @@ def main():
     start.pack(padx=10,pady=10)
     continue_league_button.pack(padx=10,pady=10)
     exit.pack(padx=10,pady=10)
-    label1.grid(row=0,column=0)
-    main_frame.grid(row=1,column=0)
+    main_frame.pack()
     master.mainloop()
 
 #to go to main again after storing club
