@@ -234,6 +234,7 @@ class Club:
     """
     @staticmethod
     def add_club(window):
+        # frame.pack_forget()
         window.destroy()#to destroy the previous window
         master=Tk()#window object
         master.iconbitmap('4876628.ico')
@@ -268,39 +269,42 @@ class Club:
         club_name_label.grid(row=0,column=0,padx=10,pady=10)
         club_name_entry.grid(row=0,column=1,padx=10,pady=10)
         club_name_button.grid(row=0,column=2,padx=10,pady=10)
-        delete_frame.grid(row=1000)
+        delete_frame.pack()
     """take the frame to delete it after it no longer neaded and entry to take the data from it""" 
     @staticmethod
     def delete_club(frame,entry):
-        name=entry.get().strip().title()
-        clubs=[]#empty list to store all clubs name in it
-        try:
-            #try read the data 
-            with open(f'{os.getcwd()}/allclubs.csv','r',newline='') as csvfile:
-                reader = csv.reader(csvfile,delimiter=',',quotechar='|')
-                for club in reader:
-                    clubs.append(club[0])
-                #close the file
-            if name in clubs:#if you find the club do the operations
-                sure=messagebox.askyesno("SURE","are you sure you want to delete the club?")
-                if sure==1:
-                    clubs.remove(name)
-                    os.remove(f'{os.getcwd()}/{name}/{name}.csv')
-                    os.rmdir(f'{os.getcwd()}/{name}')
-                    #to rewrite the all clubs file without that club name
-                    with open(f'{os.getcwd()}/allclubs.csv','w',newline='') as csvfile:
-                        writer = csv.writer(csvfile,delimiter=',',quotechar='|')
-                        for club in clubs:
-                            writer.writerow([club])
+        if not_empty_entry(entry):
+            name=entry.get().strip().title()
+            clubs=[]#empty list to store all clubs name in it
+            try:
+                #try read the data 
+                with open(f'{os.getcwd()}/allclubs.csv','r',newline='') as csvfile:
+                    reader = csv.reader(csvfile,delimiter=',',quotechar='|')
+                    for club in reader:
+                        clubs.append(club[0])
                     #close the file
-                    messagebox.showinfo("DELETED","club has been successfully deleted from your database")
-                    frame.grid_forget()#to delete the delete club frame 
-                else:#no longer need to delete club
-                    messagebox.showinfo("no club","no clubs have been deleted")
-                    frame.grid_forget()#to delete the delete club frame 
-            else:#didn't find the club name
+                if name in clubs:#if you find the club do the operations
+                    sure=messagebox.askyesno("SURE","are you sure you want to delete the club?")
+                    if sure==1:
+                        clubs.remove(name)
+                        os.remove(f'{os.getcwd()}/{name}/{name}.csv')
+                        os.rmdir(f'{os.getcwd()}/{name}')
+                        #to rewrite the all clubs file without that club name
+                        with open(f'{os.getcwd()}/allclubs.csv','w',newline='') as csvfile:
+                            writer = csv.writer(csvfile,delimiter=',',quotechar='|')
+                            for club in clubs:
+                                writer.writerow([club])
+                        #close the file
+                        messagebox.showinfo("DELETED","club has been successfully deleted from your database")
+                        frame.pack_forget()#to delete the delete club frame 
+                    else:#no longer need to delete club
+                        messagebox.showinfo("no club","no clubs have been deleted")
+                        frame.pack_forget()#to delete the delete club frame 
+                else:#didn't find the club name
+                    messagebox.showinfo("no club","no club with that name")
+                    frame.pack_forget()#to delete the delete club frame 
+            except : #if the file doesn't exist means no clubs to delete
                 messagebox.showinfo("no club","no club with that name")
-                frame.grid_forget()#to delete the delete club frame 
-        except : #if the file doesn't exist means no clubs to delete
-            messagebox.showinfo("no club","no club with that name")
-            frame.grid_forget()#to delete the delete club frame           
+                frame.pack_forget()#to delete the delete club frame
+        else:
+            messagebox.showerror("EMPTY","Name Cannot Be Empty")          
