@@ -53,8 +53,11 @@ after having league (start new one, load one from database)
 show the gui for each match , the scoreboard , each team players data , matches table, and how to send the data of every match for the clubs and players database
 #### start new league
 > should be at least 3 clubs in database and not in active league
+
 > if the name already exist ask you if you want to load the data
+
 > if the database has enough clubs will load the clubs data and create the matches table
+
 > after each match show the players stats
 ![start league](https://github.com/nagy-nabil/SHOUBRA-GO/blob/main/images/startleague.jpg)
 
