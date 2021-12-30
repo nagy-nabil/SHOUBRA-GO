@@ -9,17 +9,18 @@ from PIL import Image, ImageTk
 def main():
     master=Tk()#the only window we have
     master.iconbitmap('4876628.ico')
-    master.geometry("250x500+500+200")
+    master.geometry("550x550+300+200") 
+    master.resizable(False,False)
     master.title("Shoubra Go")
     main_menu(master)
     #add the logo in row =0 col =0
     show_logo(master,250,250)
     main_frame=Frame(master)
     #add widgets
-    add_club=Button(main_frame,text="add club",command=lambda:add_to_main(master))
-    start=Button(main_frame,text="start league",command=lambda:start_to_main(master))
-    continue_league_button=Button(main_frame,text="continue league",command=lambda:continue_to_main(master))
-    exit=Button(main_frame,text="EXIT",command=master.destroy)
+    add_club=Button(main_frame,text="add club",command=lambda:add_to_main(master),width=20)
+    start=Button(main_frame,text="start league",command=lambda:start_to_main(master),width=20)
+    continue_league_button=Button(main_frame,text="continue league",command=lambda:continue_to_main(master),width=20)
+    exit=Button(main_frame,text="EXIT",command=master.destroy,width=20)
     #widgets setup with grid
     add_club.pack(padx=10,pady=10)
     start.pack(padx=10,pady=10)
