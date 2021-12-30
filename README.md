@@ -44,6 +44,7 @@ set the basic methods for any club like getters , setters ,add new club,  how to
 
 #### delete club
 >frame will show at the end of the window
+
 ![delete club](https://github.com/nagy-nabil/SHOUBRA-GO/blob/main/images/delete%20club.jpg)
 
 [^league]: league file where we set the essitial data to be knwon about any league (name,clubs list)
